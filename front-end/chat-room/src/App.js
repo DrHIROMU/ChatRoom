@@ -1,53 +1,87 @@
-import React, { useState } from 'react';
-import SockJsClient from 'react-stomp';
-import axios from "axios"
+import React, { Component } from "react";
+import SockJsClient from "react-stomp";
 
-const SOCKET_URL = 'http://localhost:8080/ws-message';
+const SOCKET_URL = "http://localhost:8080/ws-message";
 
-const App = () => {
-  const [message, setMessage] = useState('You server message here.');
-
-  const [text, setValue] = useState('Hello World');
-  const handleChange = (e) => setValue(e.target.value);
-
-  let onConnected = () => {
-    console.log("Connected!!")
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      messages: [],
+      text: "Hello World",
+      typedMessage: "",
+      name: "",
+    };
   }
 
-  let onDisconnected = () => {
-    console.log("Disconnected!!")
-  }
+  handleChange = (e) => {
+    this.setState({ text: e.target.value });
+  };
 
-  let onMessageReceived = (msg) => {
-    setMessage(msg.message);
-  }
+  onConnected = () => {
+    console.log("Connected!!");
+  };
 
-  function sendMessage(){
-    axios.post('http://localhost:8080/sendMessage', {
-      message:text
-    })
-    .then(res =>{
-      console.log(res)
-    })
-  }
+  onDisconnected = () => {
+    console.log("Disconnected!!");
+  };
 
-  return (
-    <div>
-      <SockJsClient
-        url={SOCKET_URL}
-        topics={['/topic/message']}
-        onConnect={onConnected}
-        onDisconnect={onDisconnected}
-        onMessage={msg => onMessageReceived(msg)}
-        debug={false}
-      />
-      <div>{message}</div>
+  onMessageReceived = (msg) => {
+    let messages = this.state.messages;
+    messages.push(msg);
+    this.setState({ messages: messages });
+  };
+
+  sendMessage = () => {
+    this.clientRef.sendMessage(
+      "/app/sendMessage",
+      JSON.stringify({
+        message: this.state.text,
+      })
+    );
+  };
+
+  displayMessages = () => {
+    return (
       <div>
-        <textarea rows="4" cols="50" value={text} onChange={handleChange}></textarea>
-        <button onClick={sendMessage}>Send</button>
+        {this.state.messages.map((msg) => {
+          return (
+            <div>
+              <p>{msg}</p>
+            </div>
+          );
+        })}
       </div>
-    </div>    
-  );
+    );
+  };
+
+  render() {
+    return (
+      <div>
+        <SockJsClient
+          url={SOCKET_URL}
+          topics={["/topic/message"]}
+          onConnect={this.onConnected}
+          onDisconnect={this.onDisconnected}
+          onMessage={(msg) => this.onMessageReceived(msg)}
+          ref={(client) => {
+            this.clientRef = client;
+          }}
+        />
+
+        <div className="align-center">{this.displayMessages()}</div>
+        <div>
+          <textarea
+            rows="4"
+            cols="50"
+            value={this.text}
+            onChange={this.handleChange}
+          ></textarea>
+          <button onClick={this.sendMessage}>Send</button>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default App;

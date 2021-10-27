@@ -18,6 +18,6 @@ public class WebConfig implements WebMvcConfigurer
                 .allowedHeaders("Accept", "Content-Type", "Origin",
                         "Authorization", "X-Auth-Token")
                 .exposedHeaders("X-Auth-Token", "Authorization")
-                .allowedMethods("POST", "GET", "DELETE", "PUT", "OPTIONS");
+                .allowedMethods("*");
     }
 }

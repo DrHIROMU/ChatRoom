@@ -24,9 +24,9 @@ public class WebSocketTextController {
     }
 
     @MessageMapping("/sendMessage")
-    public void receiveMessage(@Payload TextMessageDTO textMessageDTO) {
-        // receive message from client
-        template.convertAndSend("/topic/message", textMessageDTO);
+    @SendTo("/topic/message")
+    public String receiveMessage(@Payload TextMessageDTO textMessageDTO) {
+        return textMessageDTO.getMessage();
     }
 
 
