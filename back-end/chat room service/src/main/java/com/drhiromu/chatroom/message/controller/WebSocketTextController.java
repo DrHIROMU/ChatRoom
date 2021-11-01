@@ -17,7 +17,7 @@ public class WebSocketTextController {
     @Autowired
     SimpMessagingTemplate template;
 
-    @PostMapping("/send")
+    @PostMapping("/announcement")
     public ResponseEntity<Void> sendMessage(@RequestBody TextMessageDTO textMessageDTO) {
         template.convertAndSend("/topic/message", textMessageDTO);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -25,13 +25,7 @@ public class WebSocketTextController {
 
     @MessageMapping("/sendMessage")
     @SendTo("/topic/message")
-    public String receiveMessage(@Payload TextMessageDTO textMessageDTO) {
-        return textMessageDTO.getMessage();
-    }
-
-
-    @SendTo("/topic/message")
-    public TextMessageDTO broadcastMessage(@Payload TextMessageDTO textMessageDTO) {
+    public TextMessageDTO receiveMessage(@Payload TextMessageDTO textMessageDTO) {
         return textMessageDTO;
     }
 }

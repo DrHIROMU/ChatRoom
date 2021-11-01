@@ -26,9 +26,9 @@ class App extends Component {
     console.log("Disconnected!!");
   };
 
-  onMessageReceived = (msg) => {
+  onMessageReceived = (msgInfo) => {
     let messages = this.state.messages;
-    messages.push(msg);
+    messages.push(msgInfo.message);
     this.setState({ messages: messages });
   };
 
