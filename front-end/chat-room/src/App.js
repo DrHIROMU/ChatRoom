@@ -10,8 +10,42 @@ class App extends Component {
       messages: [],
       text: "Hello World",
       typedMessage: "",
-      name: "",
+      userName: "",
     };
+  }
+
+  connect = ()=>{
+    console.log(this.state.text)
+    // let stompClient = null;
+
+    // let socket = new SockJS('http://localhost:8080/ws-message');
+    // stompClient = Stomp.over(socket);
+    
+    // stompClient.connect({user:userName}, function(frame) {
+    //     setConnected(true);
+    //     console.log('Connected: ' + frame);
+
+    //     // 廣播
+    //     stompClient.subscribe('/topic/messages', function(messageOutput) {
+    //         showMessageOutput(JSON.parse(messageOutput.body));
+    //     });
+
+    //     // 私人
+    //     stompClient.subscribe('/user/subscribe', function(messageOutput) {
+    //     showMessageOutput(JSON.parse(messageOutput.body));
+    //     });
+
+    // });
+  }
+
+  handleInputChange = (event)=>{
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
   }
 
   handleChange = (e) => {
@@ -58,7 +92,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <SockJsClient
+        {/* <SockJsClient
           url={SOCKET_URL}
           topics={["/topic/message"]}
           onConnect={this.onConnected}
@@ -67,17 +101,22 @@ class App extends Component {
           ref={(client) => {
             this.clientRef = client;
           }}
-        />
+        /> */}
+        <div>
+          <input type="text" name="userName" value={this.state.userName} onChange={this.handleInputChange} />
+          <button type="button" onClick={this.connect}>Connect</button>
+        </div>
 
         <div className="align-center">{this.displayMessages()}</div>
         <div>
           <textarea
             rows="4"
             cols="50"
+            name="text"
             value={this.text}
-            onChange={this.handleChange}
+            onChange={this.handleInputChange}
           ></textarea>
-          <button onClick={this.sendMessage}>Send</button>
+          <button onClick={this.connect}>Send</button>
         </div>
       </div>
     );
