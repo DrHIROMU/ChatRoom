@@ -26,6 +26,6 @@ public class WebSocketTextController {
     @MessageMapping("/sendMessage")
     @SendTo("/topic/message")
     public TextMessageDTO receiveMessage(@Payload TextMessageDTO textMessageDTO) {
-        return textMessageDTO;
+         return textMessageDTO;
     }
 }
