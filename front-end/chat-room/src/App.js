@@ -1,9 +1,13 @@
 import React, { Component } from "react";
 import SockJsClient from "react-stomp";
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs'
 
 const SOCKET_URL = "http://localhost:8080/ws-message";
 
-class App extends Component {
+let stompClient = null;
+
+class App extends Component { 
   constructor(props) {
     super(props);
     this.state = {
@@ -11,31 +15,35 @@ class App extends Component {
       text: "Hello World",
       typedMessage: "",
       userName: "",
-    };
+    };    
+    this.test();
+  }  
+
+  test(params) {
+    console.log(this.state.text)
   }
 
-  connect = ()=>{
-    console.log(this.state.text)
-    // let stompClient = null;
-
-    // let socket = new SockJS('http://localhost:8080/ws-message');
-    // stompClient = Stomp.over(socket);
+  connect = ()=>{   
+    let socket = new SockJS('http://localhost:8080/ws-message');
+    stompClient = Stomp.over(socket);
     
-    // stompClient.connect({user:userName}, function(frame) {
-    //     setConnected(true);
-    //     console.log('Connected: ' + frame);
+    stompClient.connect({user:this.state.userName}, function(frame) {
+        // setConnected(true);
+        console.log('Connected: ' + frame);
 
-    //     // 廣播
-    //     stompClient.subscribe('/topic/messages', function(messageOutput) {
-    //         showMessageOutput(JSON.parse(messageOutput.body));
-    //     });
+        // 廣播
+        stompClient.subscribe('/topic/message', function(msgInfo) {
+          console.log(msgInfo);
+          this.onMessageReceived(msgInfo);
+        }
+        );
 
-    //     // 私人
-    //     stompClient.subscribe('/user/subscribe', function(messageOutput) {
-    //     showMessageOutput(JSON.parse(messageOutput.body));
-    //     });
+        // 私人
+        // stompClient.subscribe('/user/subscribe', function(msgInfo) {
+        //   this.onMessageReceived(msgInfo).bind(this);
+        // });
 
-    // });
+    });
   }
 
   handleInputChange = (event)=>{
@@ -61,18 +69,24 @@ class App extends Component {
   };
 
   onMessageReceived = (msgInfo) => {
+    console.log(msgInfo)
     let messages = this.state.messages;
     messages.push(msgInfo.message);
     this.setState({ messages: messages });
   };
 
   sendMessage = () => {
-    this.clientRef.sendMessage(
-      "/app/sendMessage",
-      JSON.stringify({
-        message: this.state.text,
-      })
-    );
+    let msgInfo = {
+      message : this.state.text
+    }
+
+    stompClient.send("/app/sendMessage", {}, JSON.stringify(msgInfo));
+    // this.clientRef.sendMessage(
+    //   "/app/sendMessage",
+    //   JSON.stringify({
+    //     message: this.state.text,
+    //   })
+    // );
   };
 
   displayMessages = () => {
@@ -104,7 +118,7 @@ class App extends Component {
         /> */}
         <div>
           <input type="text" name="userName" value={this.state.userName} onChange={this.handleInputChange} />
-          <button type="button" onClick={this.connect}>Connect</button>
+          <button type="button" onClick={this.connect.bind(this)}>Connect</button>
         </div>
 
         <div className="align-center">{this.displayMessages()}</div>
@@ -113,10 +127,10 @@ class App extends Component {
             rows="4"
             cols="50"
             name="text"
-            value={this.text}
+            value={this.state.text}
             onChange={this.handleInputChange}
           ></textarea>
-          <button onClick={this.connect}>Send</button>
+          <button onClick={this.sendMessage}>Send</button>
         </div>
       </div>
     );
