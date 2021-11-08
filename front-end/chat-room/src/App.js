@@ -16,34 +16,33 @@ class App extends Component {
       typedMessage: "",
       userName: "",
     };    
-    this.test();
   }  
-
-  test(params) {
-    console.log(this.state.text)
-  }
 
   connect = ()=>{   
     let socket = new SockJS('http://localhost:8080/ws-message');
     stompClient = Stomp.over(socket);
     
     stompClient.connect({user:this.state.userName}, function(frame) {
-        // setConnected(true);
         console.log('Connected: ' + frame);
 
         // 廣播
         stompClient.subscribe('/topic/message', function(msgInfo) {
-          console.log(msgInfo);
           this.onMessageReceived(msgInfo);
-        }
-        );
+        }.bind(this));
 
         // 私人
         // stompClient.subscribe('/user/subscribe', function(msgInfo) {
         //   this.onMessageReceived(msgInfo).bind(this);
         // });
 
-    });
+    }.bind(this));
+  }
+
+  disconnect() {
+    if(stompClient != null) {
+        stompClient.disconnect();
+    }
+    console.log("Disconnected");
   }
 
   handleInputChange = (event)=>{
@@ -56,37 +55,20 @@ class App extends Component {
     });
   }
 
-  handleChange = (e) => {
-    this.setState({ text: e.target.value });
-  };
-
-  onConnected = () => {
-    console.log("Connected!!");
-  };
-
-  onDisconnected = () => {
-    console.log("Disconnected!!");
-  };
-
   onMessageReceived = (msgInfo) => {
-    console.log(msgInfo)
+    let response = JSON.parse(msgInfo.body);
     let messages = this.state.messages;
-    messages.push(msgInfo.message);
+    messages.push(response.message);
     this.setState({ messages: messages });
   };
 
   sendMessage = () => {
     let msgInfo = {
-      message : this.state.text
+      user: this.state.userName,
+      message: this.state.text
     }
 
     stompClient.send("/app/sendMessage", {}, JSON.stringify(msgInfo));
-    // this.clientRef.sendMessage(
-    //   "/app/sendMessage",
-    //   JSON.stringify({
-    //     message: this.state.text,
-    //   })
-    // );
   };
 
   displayMessages = () => {
@@ -94,9 +76,7 @@ class App extends Component {
       <div>
         {this.state.messages.map((msg) => {
           return (
-            <div>
-              <p>{msg}</p>
-            </div>
+            <div>{msg}</div>
           );
         })}
       </div>
@@ -106,19 +86,10 @@ class App extends Component {
   render() {
     return (
       <div>
-        {/* <SockJsClient
-          url={SOCKET_URL}
-          topics={["/topic/message"]}
-          onConnect={this.onConnected}
-          onDisconnect={this.onDisconnected}
-          onMessage={(msg) => this.onMessageReceived(msg)}
-          ref={(client) => {
-            this.clientRef = client;
-          }}
-        /> */}
         <div>
           <input type="text" name="userName" value={this.state.userName} onChange={this.handleInputChange} />
-          <button type="button" onClick={this.connect.bind(this)}>Connect</button>
+          <button type="button" onClick={this.connect}>Connect</button>
+          <button type="button" onClick={this.disconnect}>Disconnect</button>
         </div>
 
         <div className="align-center">{this.displayMessages()}</div>
