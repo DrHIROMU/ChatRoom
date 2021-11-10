@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import SockJsClient from "react-stomp";
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs'
+import Clock from "./clock/Clock";
 
 const SOCKET_URL = "http://localhost:8080/ws-message";
 
@@ -83,6 +84,11 @@ class App extends Component {
     );
   };
 
+  Welcome(props){
+    return <h1>Hello {props.name}</h1>
+  }
+  
+
   render() {
     return (
       <div>
@@ -91,8 +97,9 @@ class App extends Component {
           <button type="button" onClick={this.connect}>Connect</button>
           <button type="button" onClick={this.disconnect}>Disconnect</button>
         </div>
-
+        <Clock/>
         <div className="align-center">{this.displayMessages()}</div>
+        <this.Welcome name="Sara"/>
         <div>
           <textarea
             rows="4"

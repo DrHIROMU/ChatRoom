@@ -1,0 +1,13 @@
+SRM API
+172.20.14.16
+root
+$rmp177
+
+SRM WEB1
+172.20.12.16
+root
+$rmp166
+
+Path
+/home/ibmsrm/logs/srm_ep_portal
+
