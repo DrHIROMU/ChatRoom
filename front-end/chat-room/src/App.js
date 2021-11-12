@@ -39,7 +39,7 @@ class App extends Component {
     }.bind(this));
   }
 
-  disconnect() {
+  disconnect = (arg)=>{
     if(stompClient != null) {
         stompClient.disconnect();
     }
@@ -87,6 +87,15 @@ class App extends Component {
   Welcome(props){
     return <h1>Hello {props.name}</h1>
   }
+
+  Count(props){
+    let count = 0;
+    return (
+      <div>
+        { false && <h1>Messages: {count}</h1>}
+      </div>
+    );
+  }
   
 
   render() {
@@ -95,11 +104,12 @@ class App extends Component {
         <div>
           <input type="text" name="userName" value={this.state.userName} onChange={this.handleInputChange} />
           <button type="button" onClick={this.connect}>Connect</button>
-          <button type="button" onClick={this.disconnect}>Disconnect</button>
+          <button type="button" onClick={this.disconnect.bind(this, 'werw')}>Disconnect</button>
         </div>
         <Clock/>
         <div className="align-center">{this.displayMessages()}</div>
         <this.Welcome name="Sara"/>
+        <this.Count/>
         <div>
           <textarea
             rows="4"
