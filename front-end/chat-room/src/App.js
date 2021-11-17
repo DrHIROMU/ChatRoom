@@ -1,14 +1,14 @@
 import React, { Component } from "react";
 import SockJsClient from "react-stomp";
-import SockJS from 'sockjs-client';
-import Stomp from 'stompjs'
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
 import Clock from "./clock/Clock";
 
 const SOCKET_URL = "http://localhost:8080/ws-message";
 
 let stompClient = null;
 
-class App extends Component { 
+class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -16,45 +16,50 @@ class App extends Component {
       text: "Hello World",
       typedMessage: "",
       userName: "",
-    };    
-  }  
+    };
+  }
 
-  connect = ()=>{   
-    let socket = new SockJS('http://localhost:8080/ws-message');
+  connect = () => {
+    let socket = new SockJS("http://localhost:8080/ws-message");
     stompClient = Stomp.over(socket);
-    
-    stompClient.connect({user:this.state.userName}, function(frame) {
-        console.log('Connected: ' + frame);
+
+    stompClient.connect(
+      { user: this.state.userName },
+      function (frame) {
+        console.log("Connected: " + frame);
 
         // 廣播
-        stompClient.subscribe('/topic/message', function(msgInfo) {
-          this.onMessageReceived(msgInfo);
-        }.bind(this));
+        stompClient.subscribe(
+          "/topic/message",
+          function (msgInfo) {
+            this.onMessageReceived(msgInfo);
+          }.bind(this)
+        );
 
         // 私人
         // stompClient.subscribe('/user/subscribe', function(msgInfo) {
         //   this.onMessageReceived(msgInfo).bind(this);
         // });
+      }.bind(this)
+    );
+  };
 
-    }.bind(this));
-  }
-
-  disconnect = (arg)=>{
-    if(stompClient != null) {
-        stompClient.disconnect();
+  disconnect = (arg) => {
+    if (stompClient != null) {
+      stompClient.disconnect();
     }
     console.log("Disconnected");
-  }
+  };
 
-  handleInputChange = (event)=>{
+  handleInputChange = (event) => {
     const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const value = target.type === "checkbox" ? target.checked : target.value;
     const name = target.name;
 
     this.setState({
-      [name]: value
+      [name]: value,
     });
-  }
+  };
 
   onMessageReceived = (msgInfo) => {
     let response = JSON.parse(msgInfo.body);
@@ -66,8 +71,8 @@ class App extends Component {
   sendMessage = () => {
     let msgInfo = {
       user: this.state.userName,
-      message: this.state.text
-    }
+      message: this.state.text,
+    };
 
     stompClient.send("/app/sendMessage", {}, JSON.stringify(msgInfo));
   };
@@ -76,40 +81,46 @@ class App extends Component {
     return (
       <div>
         {this.state.messages.map((msg) => {
-          return (
-            <div>{msg}</div>
-          );
+          return <div>{msg}</div>;
         })}
       </div>
     );
   };
 
-  Welcome(props){
-    return <h1>Hello {props.name}</h1>
+  Welcome(props) {
+    return <h1>Hello {props.name}</h1>;
   }
 
-  Count(props){
+  Count(props) {
     let count = 0;
-    return (
-      <div>
-        { false && <h1>Messages: {count}</h1>}
-      </div>
-    );
+    return <div>{false && <h1>Messages: {count}</h1>}</div>;
   }
-  
+
+  listItems() {
+    let listItems = ["1", "2", "3"].map((number) => <li key={number.toString()}>{number}</li>);
+    return listItems;
+  }
 
   render() {
     return (
       <div>
         <div>
-          <input type="text" name="userName" value={this.state.userName} onChange={this.handleInputChange} />
-          <button type="button" onClick={this.connect}>Connect</button>
-          <button type="button" onClick={this.disconnect.bind(this, 'werw')}>Disconnect</button>
+          <input
+            type="text"
+            name="userName"
+            value={this.state.userName}
+            onChange={this.handleInputChange}
+          />
+          <button type="button" onClick={this.connect}>
+            Connect
+          </button>
+          <button type="button" onClick={this.disconnect.bind(this, "werw")}>
+            Disconnect
+          </button>
         </div>
-        <Clock/>
+        <Clock />
         <div className="align-center">{this.displayMessages()}</div>
-        <this.Welcome name="Sara"/>
-        <this.Count/>
+        <ul>{this.listItems()}</ul>
         <div>
           <textarea
             rows="4"
