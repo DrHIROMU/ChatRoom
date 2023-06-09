@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: ChatRoom
+  datasource:
+    url: jdbc:mariadb://localhost:3306/chat_room
+    username: root
+    password: 123456
+    driver-class-name: org.mariadb.jdbc.Driver
+  boot:
+    admin:
+      client:
+        url: http://localhost:8080
+        metadata:
+          user.name: ${security.user.name}
+          user.password: ${security.user.password}
+
+security:
+  user:
+    name: admin
+    password: admin123
+
+server:
+  port: 8081
+
+management.security.enabled: true
+
+spring.jpa.hibernate.ddl-auto: update
+
+
