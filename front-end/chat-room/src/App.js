@@ -1,27 +1,63 @@
-import React, { useState, Component } from "react";
+import React, { useState, useEffect, Component } from "react";
 import SockJsClient from "react-stomp";
 import NameComponent from "./components/NameComponent";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import "./css/MessageStyle.css";
+import SockJS from "sockjs-client";
+import Stomp from "stompjs";
 
 function App() {
-  let clientRef;
   const WEBSOCKET_URL = "http://localhost:8081/websocket-chat";
 
   const [name, setName] = useState("");
   const [typedMessage, setTypedMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [socketClient, setClient] = useState([]);
 
   let sendMessage = () => {
-    clientRef.sendMessage(
-      "/app/user-all",
+    socketClient.send(
+      "/app/user-all/",
       JSON.stringify({
         name: name,
         message: typedMessage,
       })
     );
   };
+
+  useEffect(() => {
+    let sock = new SockJS(WEBSOCKET_URL);
+    let client = Stomp.over(sock);
+    setClient(client);
+
+    client.connect({}, function () {
+      client.subscribe("/topic/user/", function (msg) {
+        let newMessages = messages.slice();
+        newMessages.push(msg);
+        console.log(newMessages);
+        setMessages(newMessages);
+      });
+    });
+  }, []);
+
+  /* <SockJsClient
+        url={WEBSOCKET_URL}
+        topics={["/topic/user"]}
+        onConnect={() => {
+          console.log("connected");
+        }}
+        onDisconnect={() => {
+          console.log("Disconnected");
+        }}
+        onMessage={(msg) => {
+          let newMessages = messages.slice();
+          newMessages.push(msg);
+          setMessages(newMessages);
+        }}
+        ref={(client) => {
+          clientRef = client;
+        }}
+      /> */
 
   let displayMessages = () => {
     return (
@@ -80,25 +116,6 @@ function App() {
         </table>
       </div>
       <div className="align-center">{displayMessages()}</div>
-
-      <SockJsClient
-        url={WEBSOCKET_URL}
-        topics={["/topic/user"]}
-        onConnect={() => {
-          console.log("connected");
-        }}
-        onDisconnect={() => {
-          console.log("Disconnected");
-        }}
-        onMessage={(msg) => {
-          let newMessages = messages.slice();
-          newMessages.push(msg);
-          setMessages(newMessages);
-        }}
-        ref={(client) => {
-          clientRef = client;
-        }}
-      />
     </>
   );
 }
