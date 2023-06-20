@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Component } from "react";
+import React, { useState, useEffect, useRef, Component } from "react";
 import SockJsClient from "react-stomp";
 import NameComponent from "./components/NameComponent";
 import Button from "@material-ui/core/Button";
@@ -14,10 +14,12 @@ function App() {
   const [typedMessage, setTypedMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [socketClient, setClient] = useState([]);
+  const currentMsgs = useRef([]);
 
   let sendMessage = () => {
     socketClient.send(
-      "/app/user-all/",
+      "/app/user/2",
+      {},
       JSON.stringify({
         name: name,
         message: typedMessage,
@@ -25,20 +27,37 @@ function App() {
     );
   };
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   let sock = new SockJS(WEBSOCKET_URL);
+  //   let client = Stomp.over(sock);
+  //   setClient(client);
+
+  //   client.connect({}, function () {
+  //     client.subscribe("/topic/user/2", (response) => {
+  //       let responseBody = JSON.parse(response.body);
+  //       let newMessages = currentMsgs.current.slice();
+  //       newMessages.push(responseBody);
+  //       currentMsgs.current = newMessages;
+  //       setMessages(newMessages);
+  //     });
+  //   });
+  // }, []);
+
+  let connect = () => {
     let sock = new SockJS(WEBSOCKET_URL);
     let client = Stomp.over(sock);
     setClient(client);
 
     client.connect({}, function () {
-      client.subscribe("/topic/user/", function (msg) {
-        let newMessages = messages.slice();
-        newMessages.push(msg);
-        console.log(newMessages);
+      client.subscribe("/topic/user/2", (response) => {
+        let responseBody = JSON.parse(response.body);
+        let newMessages = currentMsgs.current.slice();
+        newMessages.push(responseBody);
+        currentMsgs.current = newMessages;
         setMessages(newMessages);
       });
     });
-  }, []);
+  };
 
   /* <SockJsClient
         url={WEBSOCKET_URL}
